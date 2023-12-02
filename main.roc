@@ -9,9 +9,23 @@ app "hello"
 
 splitLines = \x -> (Str.split x "\n")
 
+digits = Set.fromList(["1", "2", "3", "4", "5", "6", "7", "8", "9"])
+
 getFirstDigit = \line -> Str.graphemes line |> List.findFirst (\x -> Set.contains digits x) |> Result.withDefault ""
 getLastDigit = \line -> Str.graphemes line |> List.findLast (\x -> Set.contains digits x) |> Result.withDefault ""
 
+getDigitSum = \lines -> 
+    firstDigits = List.map lines getFirstDigit
+    lastDigits = List.map lines getLastDigit
+    List.map2 firstDigits lastDigits (\f, l -> Str.joinWith [f, l] "")
+        |> List.map Str.toU32
+        |> List.map \x -> Result.withDefault x 0
+        |> List.sum
+        |> Num.toStr
+
+
+part1 = 
+    input |> splitLines |> getDigitSum
 
 part2replacements = [
     ("one", "one1one"),
@@ -25,20 +39,6 @@ part2replacements = [
     ("nine", "nine9nine")
 ]
 replace = \s -> List.walk part2replacements s \line, (substr, replacement) -> Str.replaceEach line substr replacement
-
-digits = Set.fromList(["1", "2", "3", "4", "5", "6", "7", "8", "9"])
-getDigitSum = \lines -> 
-    firstDigits = List.map lines getFirstDigit
-    lastDigits = List.map lines getLastDigit
-    List.map2 firstDigits lastDigits (\f, l -> Str.joinWith [f, l] "")
-        |> List.map Str.toU32
-        |> List.map \x -> Result.withDefault x 0
-        |> List.sum
-        |> Num.toStr
-
-
-part1 = 
-    input |> splitLines |> getDigitSum
 
 part2 = 
     input |> splitLines |> List.map replace |> getDigitSum
