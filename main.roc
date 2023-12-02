@@ -9,21 +9,11 @@ app "hello"
 
 splitLines = \x -> (Str.split x "\n")
 
-part1 = 
-    lines = input |> splitLines
-    digits = Set.fromList(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
-    getFirstDigit = \line -> Str.graphemes line |> List.findFirst (\x -> Set.contains digits x) |> Result.withDefault ""
-    getLastDigit = \line -> Str.graphemes line |> List.findLast (\x -> Set.contains digits x) |> Result.withDefault ""
-    firstDigits = List.map lines getFirstDigit
-    lastDigits = List.map lines getLastDigit
-    List.map2 firstDigits lastDigits (\f, l -> Str.joinWith [f, l] "")
-        |> List.map Str.toU32
-        |> List.map \x -> Result.withDefault x 0
-        |> List.sum
-        |> Num.toStr
+getFirstDigit = \line -> Str.graphemes line |> List.findFirst (\x -> Set.contains digits x) |> Result.withDefault ""
+getLastDigit = \line -> Str.graphemes line |> List.findLast (\x -> Set.contains digits x) |> Result.withDefault ""
 
 
-replacements = [
+part2replacements = [
     ("one", "one1one"),
     ("two", "two2two"),
     ("three", "three3three"),
@@ -34,22 +24,25 @@ replacements = [
     ("eight", "eight8eight"),
     ("nine", "nine9nine")
 ]
+replace = \s -> List.walk part2replacements s \line, (substr, replacement) -> Str.replaceEach line substr replacement
 
-part2 = 
-    lines = input |> splitLines
-    digits = Set.fromList(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
-    replace = \s -> List.walk replacements s \line, (substr, replacement) -> Str.replaceEach line substr replacement
-    replacedLines = List.map lines replace
-    getFirstDigit = \line -> Str.graphemes line |> List.findFirst (\x -> Set.contains digits x) |> Result.withDefault ""
-    getLastDigit = \line -> Str.graphemes line |> List.findLast (\x -> Set.contains digits x) |> Result.withDefault ""
-    firstDigits = List.map replacedLines getFirstDigit
-    lastDigits = List.map replacedLines getLastDigit
+digits = Set.fromList(["1", "2", "3", "4", "5", "6", "7", "8", "9"])
+getDigitSum = \lines -> 
+    firstDigits = List.map lines getFirstDigit
+    lastDigits = List.map lines getLastDigit
     List.map2 firstDigits lastDigits (\f, l -> Str.joinWith [f, l] "")
         |> List.map Str.toU32
         |> List.map \x -> Result.withDefault x 0
         |> List.sum
         |> Num.toStr
 
+
+part1 = 
+    input |> splitLines |> getDigitSum
+
+part2 = 
+    input |> splitLines |> List.map replace |> getDigitSum
+    
 main = 
     _ <- Task.await (Stdout.line part1)
     Stdout.line part2
